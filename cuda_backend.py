@@ -67,18 +67,18 @@ def matrix_element_wise_mul(A,B,C):
 
     cuda_kernels.matrix_element_wise_mul_kernel[blockspergrid, threadsperblock](A,B,C)
     
-def matrix_mul(A,B,C,A_transpond=False,B_transpond= False):
+def matrix_mul(A,B,C,A_transponse=False,B_transponse= False):
     '''
     Performs matrix multiplication on A and B and saves the result in C.
     A, B and C must have the same shape.
     '''
     
-    if not A_transpond:
+    if not A_transponse:
         A_touching_shape = A.shape[1]
     else:
         A_touching_shape = A.shape[0]
 
-    if not B_transpond:
+    if not B_transponse:
         B_touching_shape = B.shape[0]
     else:
         B_touching_shape = B.shape[1]
@@ -89,7 +89,7 @@ def matrix_mul(A,B,C,A_transpond=False,B_transpond= False):
 
     threadsperblock, blockspergrid = divide_memory(A.shape[0],B.shape[1])
 
-    cuda_kernels.matrix_mul_kernel[blockspergrid, threadsperblock](A,B,C,A_transpond,B_transpond)
+    cuda_kernels.matrix_mul_kernel[blockspergrid, threadsperblock](A,B,C,A_transponse,B_transponse)
 
 def sum_loss(cost,loss,n):
     '''

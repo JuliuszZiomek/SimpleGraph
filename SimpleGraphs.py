@@ -41,9 +41,6 @@ class Graph():
         #Stores the structure of the graph:
         self.__structure = []
 
-        #Size of the previous matrix multiplication
-        self.__prev_size = None 
-
         #Size of the recently forward propagated data set(for memory management)
         self.__data_size = None
 
@@ -149,24 +146,20 @@ class Graph():
         #Feed delta parameter as the delta of the last layer
         step = self.__structure[self.__size-1]['delta'] = delta
 
-        for i in range(self.__size-1,0,-1):
+        for i in range(self.__size-1,-1,-1):
 
             step = self.__structure[i]
-            prev_step = self.__structure[i-1]    
+            if i!=0: prev_step = self.__structure[i-1]    
            
            #Backprop through the step in graph
             if step['operation']=='mat_mul':
-                cuda_backend.matrix_mul(step['input'],step["delta"],step["gradient"],A_transpond=True)
-                cuda_backend.matrix_mul(step["delta"],step['weight'],prev_step["delta"],B_transpond=True)
+                cuda_backend.matrix_mul(step['input'],step["delta"],step["gradient"],A_transponse=True)
+                if i!=0: cuda_backend.matrix_mul(step["delta"],step['weight'],prev_step["delta"],B_transponse=True)
             
             if step['operation']=='activation':
                 step['function'].backward(step['input'],step['gradient'])
-                cuda_backend.matrix_element_wise_mul(step['delta'],step['gradient'],prev_step["delta"])    
+                if i!=0: cuda_backend.matrix_element_wise_mul(step['delta'],step['gradient'],prev_step["delta"])    
         
-
-        #Backprop through the fist step in the graph
-        step = self.__structure[0]
-        if step['operation']=='mat_mul': cuda_backend.matrix_mul(step['input'],step["delta"],step["gradient"],A_transpond=True)
 
         
     def update_weights(self,alpha):

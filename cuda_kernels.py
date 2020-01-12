@@ -47,13 +47,13 @@ def matrix_constant_mul_kernel(c,A,B):
     B[x,y] = A[x,y] * c
 
 @cuda.jit
-def matrix_mul_kernel(A,B,C,A_transpond,B_transpond):
+def matrix_mul_kernel(A,B,C,A_transponse,B_transponse):
 
     #Locate the thread position
     x, y = cuda.grid(2)
 
     #Calculate the maximum index of the touching dimension
-    if A_transpond: dim_max = A.shape[0]
+    if A_transponse: dim_max = A.shape[0]
     else: dim_max = A.shape[1]
 
     #Temporary variables in which parts of matrices A and B will be loaded
@@ -79,14 +79,14 @@ def matrix_mul_kernel(A,B,C,A_transpond,B_transpond):
 
         #Load parts of matrices but only if not exceeding the maximum length of a dimension
         if(a_position<dim_max):
-            if not A_transpond: tempA[tx,ty] = A[x, a_position]
+            if not A_transponse: tempA[tx,ty] = A[x, a_position]
             else:  tempA[tx,ty] = A[a_position,x]
 
         else: 
             tempA[tx,ty] = 0
 
         if(b_position<dim_max):
-            if not B_transpond: tempB[tx,ty] = B[b_position,y]    
+            if not B_transponse: tempB[tx,ty] = B[b_position,y]    
             else:  tempB[tx,ty] = B[y,b_position]
                 
         else: 
